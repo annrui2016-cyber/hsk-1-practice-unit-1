@@ -1,26 +1,118 @@
-[
-  {
-    "id": 1,
-    "type": "Reading_Type_1",
-    "pinyin": ["tā", "shì", "dà", "xué", "shēng"],
-    "chars": ["他", "是", "大", "学", "生"],
-    "options": [
-      {"id": "A", "img": "assets/images/primary.jpg", "desc": "Elementary"},
-      {"id": "B", "img": "assets/images/university.jpg", "desc": "University"},
-      {"id": "C", "img": "assets/images/doctor.jpg", "desc": "Doctor"}
-    ],
-    "answer": "B"
-  },
-  {
-    "id": 2,
-    "type": "Reading_Type_1",
-    "pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi"],
-    "chars": ["你", "叫", "什", "么", "名", "字"],
-    "options": [
-      {"id": "A", "img": "assets/images/intro.jpg", "desc": "Greeting"},
-      {"id": "B", "img": "assets/images/five.jpg", "desc": "Five"},
-      {"id": "C", "img": "assets/images/teacher.jpg", "desc": "Teacher"}
-    ],
-    "answer": "A"
-  }
-]
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 1 自测系统 - 阅读第一部分</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 拼音与汉字对齐样式 */
+        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 6px; }
+        .pinyin { font-size: 0.9rem; color: #6b7280; line-height: 1; margin-bottom: 2px; }
+        .char { font-size: 2rem; font-weight: 500; color: #1f2937; }
+        /* 选项悬停效果 */
+        .option-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <div class="w-full max-w-3xl flex justify-between items-center mb-8">
+        <div class="text-lg font-bold text-slate-700">HSK 3.0 Level 1</div>
+        <div id="progress-text" class="text-blue-600 font-semibold">进度: 0/0</div>
+    </div>
+
+    <div id="quiz-card" class="w-full max-w-3xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-6 md:p-10 border border-slate-100">
+        
+        <div class="text-slate-400 text-sm font-bold uppercase tracking-wider mb-6 text-center">
+            Reading Part 1: Select the correct picture
+        </div>
+
+        <div id="sentence-display" class="flex flex-wrap justify-center items-end mb-12 min-h-[100px] py-6 bg-slate-50 rounded-2xl">
+            <div class="text-slate-400 animate-pulse">正在加载题库...</div>
+        </div>
+
+        <div id="options-display" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <div id="feedback" class="mt-8 px-8 py-3 rounded-full font-bold text-lg hidden transition-all duration-300"></div>
+
+    <script>
+        let questions = [];
+        let currentIdx = 0;
+
+        // 加载 JSON 数据
+        async function loadData() {
+            try {
+                // 强制从当前目录读取，防止路径偏移
+                const response = await fetch('./questions.json?v=' + Date.now()); 
+                if (!response.ok) throw new Error('无法读取 questions.json');
+                questions = await response.json();
+                renderQuestion();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('sentence-display').innerHTML = 
+                    `<div class="text-red-500">❌ 数据加载失败: 请检查目录下是否存在 questions.json</div>`;
+            }
+        }
+
+        function renderQuestion() {
+            if (currentIdx >= questions.length) {
+                document.getElementById('quiz-card').innerHTML = `
+                    <div class="text-center py-10">
+                        <h2 class="text-3xl font-bold text-slate-800 mb-4">🎉 练习完成！</h2>
+                        <p class="text-slate-500 mb-8">你已经掌握了本单元的所有核心词汇。</p>
+                        <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors">重新开始</button>
+                    </div>`;
+                return;
+            }
+
+            const q = questions[currentIdx];
+            document.getElementById('progress-text').innerText = `进度: ${currentIdx + 1}/${questions.length}`;
+
+            // 1. 渲染句子（拼音+汉字）
+            const sentenceDiv = document.getElementById('sentence-display');
+            sentenceDiv.innerHTML = q.pinyin.map((p, i) => `
+                <div class="ruby-container">
+                    <span class="pinyin">${p}</span>
+                    <span class="char">${q.chars[i]}</span>
+                </div>
+            `).join('');
+
+            // 2. 渲染三个选项
+            const optionsDiv = document.getElementById('options-display');
+            optionsDiv.innerHTML = q.options.map(opt => `
+                <button onclick="checkAnswer('${opt.id}')" class="option-card group relative flex flex-col bg-white border-2 border-slate-100 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500 hover:shadow-lg">
+                    <div class="aspect-square w-full overflow-hidden">
+                        <img src="${opt.img}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Option ${opt.id}">
+                    </div>
+                    <div class="py-3 bg-slate-50 text-slate-600 font-black text-xl group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        ${opt.id}
+                    </div>
+                </button>
+            `).join('');
+            
+            document.getElementById('feedback').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedId) {
+            const q = questions[currentIdx];
+            const feedback = document.getElementById('feedback');
+            const isCorrect = selectedId === q.answer;
+
+            feedback.className = `mt-8 px-8 py-3 rounded-full font-bold text-lg text-white shadow-lg transition-all ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`;
+            feedback.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 再试一次哦！Try again.";
+            feedback.classList.remove('hidden');
+
+            if (isCorrect) {
+                setTimeout(() => {
+                    currentIdx++;
+                    renderQuestion();
+                }, 1200);
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
