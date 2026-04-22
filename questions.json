@@ -1,12 +1,50 @@
-{
-  "id": 1,
-  "type": "Reading_Type_1",
-  "pinyin": ["tā", "shì", "dà", "xué", "shēng"],
-  "chars": ["他", "是", "大", "学", "生"],
-  "options": [
-    {"id": "A", "img": "assets/images/primary_student.jpg", "desc": "Elementary Student"},
-    {"id": "B", "img": "assets/images/college_student.jpg", "desc": "University Student"},
-    {"id": "C", "img": "assets/images/doctor.jpg", "desc": "Doctor"}
-  ],
-  "answer": "B"
-}
+[
+  {
+    "id": 1,
+    "type": "Reading_Type_1",
+    "pinyin": ["tā", "shì", "yī", "shēng"],
+    "chars": ["他", "是", "医", "生"],
+    "options": [
+      {"id": "A", "img": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80", "desc": "Doctor"},
+      {"id": "B", "img": "https://images.unsplash.com/photo-1577896851231-70ef14603e80?auto=format&fit=crop&w=400&q=80", "desc": "Teacher"},
+      {"id": "C", "img": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80", "desc": "Students"}
+    ],
+    "answer": "A"
+  },
+  {
+    "id": 2,
+    "type": "Reading_Type_1",
+    "pinyin": ["wǒ", "men", "shì", "xué", "sheng"],
+    "chars": ["我", "们", "是", "学", "生"],
+    "options": [
+      {"id": "A", "img": "https://images.unsplash.com/photo-1491309059426-fe414dadb4d2?auto=format&fit=crop&w=400&q=80", "desc": "Worker"},
+      {"id": "B", "img": "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=400&q=80", "desc": "People"},
+      {"id": "C", "img": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80", "correct": "Students"}
+    ],
+    "answer": "C"
+  },
+  {
+    "id": 3,
+    "type": "Reading_Type_1",
+    "pinyin": ["nǐ", "hǎo"],
+    "chars": ["你", "好"],
+    "options": [
+      {"id": "A", "img": "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&w=400&q=80", "desc": "Greeting/Hello"},
+      {"id": "B", "img": "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=400&q=80", "desc": "Goodbye"},
+      {"id": "C", "img": "https://images.unsplash.com/photo-1526660690293-bcd32dc3b123?auto=format&fit=crop&w=400&q=80", "desc": "Thank you"}
+    ],
+    "answer": "A"
+  },
+  {
+    "id": 4,
+    "type": "Reading_Type_1",
+    "pinyin": ["sì", "gè", "rén"],
+    "chars": ["四", "个", "人"],
+    "options": [
+      {"id": "A", "img": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=400&q=80", "desc": "Group of 4"},
+      {"id": "B", "img": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80", "desc": "Group of 2"},
+      {"id": "C", "img": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80", "desc": "Group of 5"}
+    ],
+    "answer": "A"
+  }
+]
