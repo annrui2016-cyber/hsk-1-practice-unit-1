@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "type": "Reading_Type_1",
+  "pinyin": ["tā", "shì", "dà", "xué", "shēng"],
+  "chars": ["他", "是", "大", "学", "生"],
+  "options": [
+    {"id": "A", "img": "assets/images/primary_student.jpg", "desc": "Elementary Student"},
+    {"id": "B", "img": "assets/images/college_student.jpg", "desc": "University Student"},
+    {"id": "C", "img": "assets/images/doctor.jpg", "desc": "Doctor"}
+  ],
+  "answer": "B"
+}
