@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 1 自测 MVP - HBZ Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pinyin { font-size: 0.8rem; color: #666; display: block; line-height: 1; }
+        .char { font-size: 1.5rem; display: block; }
+        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <div class="w-full max-w-md bg-white rounded-full h-2.5 mb-6">
+        <div id="progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 10%"></div>
+    </div>
+
+    <div id="quiz-container" class="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+        <div id="question-header" class="mb-4 text-sm text-gray-500 font-bold uppercase">Reading Type 1</div>
+        
+        <div id="sentence-area" class="mb-6 text-center py-4 bg-blue-50 rounded-lg">
+            </div>
+
+        <div id="options-area" class="grid grid-cols-1 gap-4">
+            </div>
+    </div>
+
+    <div id="feedback" class="mt-6 hidden text-center font-bold text-lg"></div>
+
+    <script>
+        // 你的 33个词与语法点题库 (MVP 示例)
+        const quizData = [
+            {
+                type: "Reading Type 1",
+                sentence: [
+                    {p: "tā", c: "他"}, {p: "shì", c: "是"}, {p: "yī", c: "一"}, {p: "shēng", c: "生"}
+                ],
+                options: [
+                    {id: 'A', img: 'assets/images/doctor.jpg', label: 'Doctor'}, // 替换为你的 MJ 图片路径
+                    {id: 'B', img: 'assets/images/student.jpg', label: 'Student'}
+                ],
+                answer: 'A'
+            },
+            {
+                type: "Reading Type 3",
+                sentence: [
+                    {p: "nǐ", c: "你"}, {p: "jiào", c: "叫"}, {p: "shén", c: "什"}, {p: "me", c: "么"}, {p: "___", c: "___"}, {p: "?", c: "?"}
+                ],
+                options: [
+                    {id: 'A', text: '名字 (Name)'},
+                    {id: 'B', text: '老师 (Teacher)'}
+                ],
+                answer: 'A'
+            }
+        ];
+
+        let currentIdx = 0;
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            const feedback = document.getElementById('feedback');
+            feedback.classList.add('hidden');
+            
+            document.getElementById('question-header').innerText = q.type;
+            
+            // 渲染带拼音的句子
+            const sentenceArea = document.getElementById('sentence-area');
+            sentenceArea.innerHTML = q.sentence.map(word => `
+                <div class="ruby-container">
+                    <span class="pinyin">${word.p}</span>
+                    <span class="char">${word.c}</span>
+                </div>
+            `).join('');
+
+            // 渲染选项
+            const optionsArea = document.getElementById('options-area');
+            optionsArea.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "border-2 border-gray-200 rounded-lg p-2 hover:border-blue-500 transition-all flex flex-col items-center";
+                
+                if(opt.img) {
+                    btn.innerHTML = `<img src="${opt.img}" class="w-full h-40 object-cover rounded mb-2"><span class="font-bold">${opt.id}</span>`;
+                } else {
+                    btn.innerHTML = `<span class="text-lg py-2">${opt.text}</span>`;
+                }
+                
+                btn.onclick = () => checkAnswer(opt.id);
+                optionsArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const feedback = document.getElementById('feedback');
+            const isCorrect = selected === quizData[currentIdx].answer;
+            
+            feedback.innerText = isCorrect ? "✅ Correct! / 太棒了！" : "❌ Wrong / 再试一次";
+            feedback.className = `mt-6 text-center font-bold text-lg ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
+            feedback.classList.remove('hidden');
+
+            if(isCorrect) {
+                setTimeout(() => {
+                    currentIdx = (currentIdx + 1) % quizData.length;
+                    renderQuestion();
+                    document.getElementById('progress').style.width = ((currentIdx + 1) / quizData.length * 100) + '%';
+                }, 1500);
+            }
+        }
+
+        renderQuestion();
+    </script>
+</body>
+</html>
