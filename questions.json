@@ -2,48 +2,24 @@
   {
     "id": 5,
     "type": "Reading_Type_2",
-    "pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi", "?"],
-    "chars": ["你", "叫", "什", "么", "名", "字", "？"],
+    "q_pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi", "?"],
+    "q_chars": ["你", "叫", "什", "么", "名", "字", "？"],
     "options": [
-      {"id": "A", "text": "我 叫 阿里。(Wǒ jiào Ālǐ.)", "img": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"},
-      {"id": "B", "text": "他 是 老师。(Tā shì lǎoshī.)", "img": "https://images.unsplash.com/photo-1577896851231-70ef14603e80?auto=format&fit=crop&w=400&q=80"},
-      {"id": "C", "text": "谢谢。(Xièxie.)", "img": "https://images.unsplash.com/photo-1526660690293-bcd32dc3b123?auto=format&fit=crop&w=400&q=80"}
-    ],
-    "answer": "A"
-  },
-  {
-    "id": 6,
-    "type": "Reading_Type_2",
-    "pinyin": ["tā", "shì", "shuí", "?"],
-    "chars": ["他", "是", "谁", "？"],
-    "options": [
-      {"id": "A", "text": "我 是 学生。(Wǒ shì xuésheng.)", "img": "https://images.unsplash.com/photo-1491309059426-fe414dadb4d2?auto=format&fit=crop&w=400&q=80"},
-      {"id": "B", "text": "他 是 我 的 医生。(Tā shì wǒ de yīshēng.)", "img": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80"},
-      {"id": "C", "img": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=400&q=80", "text": "四 个人。(Sì gè rén.)"}
-    ],
-    "answer": "B"
-  },
-  {
-    "id": 7,
-    "type": "Reading_Type_2",
-    "pinyin": ["tā", "叫", "shén", "me", "míng", "zi", "?"],
-    "chars": ["她", "叫", "什", "么", "名", "字", "？"],
-    "options": [
-      {"id": "A", "text": "她 叫 莉莉。(Tā jiào Lìlì.)", "img": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80"},
-      {"id": "B", "text": "不 是。(Bú shì.)", "img": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=400&q=80"},
-      {"id": "C", "text": "没关系。(Méi guānxi.)", "img": "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=400&q=80"}
-    ],
-    "answer": "A"
-  },
-  {
-    "id": 8,
-    "type": "Reading_Type_2",
-    "pinyin": ["nà", "ge", "rén", "shì", "shuí", "?"],
-    "chars": ["那", "个", "人", "是", "谁", "？"],
-    "options": [
-      {"id": "A", "text": "那是大学生。(Nà shì dàxuéshēng.)", "img": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80"},
-      {"id": "B", "text": "你好。(Nǐ hǎo.)", "img": "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&w=400&q=80"},
-      {"id": "C", "text": "三。(Sān.)", "img": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80"}
+      {
+        "id": "A",
+        "p": ["wǒ", "jiào", "ā", "lǐ"],
+        "c": ["我", "叫", "阿", "里"]
+      },
+      {
+        "id": "B",
+        "p": ["tā", "shì", "lǎo", "shī"],
+        "c": ["他", "是", "老", "师"]
+      },
+      {
+        "id": "C",
+        "p": ["xiè", "xie"],
+        "c": ["谢", "谢"]
+      }
     ],
     "answer": "A"
   }
