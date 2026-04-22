@@ -1,100 +1,26 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 1 自测系统 (MVP)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .pinyin { font-size: 0.9rem; color: #666; margin-bottom: -2px; }
-        .char { font-size: 1.8rem; font-weight: 500; }
-        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 5px; }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen p-4 flex flex-col items-center">
-
-    <div class="w-full max-w-2xl flex justify-between items-center mb-6">
-        <h1 class="text-xl font-bold text-gray-800">HSK 1 Reading Test</h1>
-        <div id="score" class="text-blue-600 font-bold">Progress: 0%</div>
-    </div>
-
-    <div id="quiz-box" class="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <div id="sentence-display" class="flex flex-wrap justify-center mb-10 min-h-[80px]">
-            </div>
-
-        <div id="options-display" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            </div>
-    </div>
-
-    <div id="feedback" class="mt-8 text-xl font-bold hidden"></div>
-
-    <script>
-        let questions = [];
-        let currentIdx = 0;
-
-        // 核心步骤：从 JSON 文件读取数据
-        async function loadQuizData() {
-            try {
-                // 确保你的 GitHub 仓库里有 questions.json 这个文件
-                const response = await fetch('questions.json');
-                questions = await response.json();
-                renderQuestion();
-            } catch (err) {
-                console.error("加载题库失败:", err);
-                document.getElementById('sentence-display').innerHTML = "加载题库失败，请检查 questions.json";
-            }
-        }
-
-        function renderQuestion() {
-            if (currentIdx >= questions.length) {
-                document.getElementById('quiz-box').innerHTML = "<h2 class='text-2xl text-center p-10'>恭喜！你完成了所有练习。</h2>";
-                return;
-            }
-
-            const q = questions[currentIdx];
-            const feedback = document.getElementById('feedback');
-            feedback.classList.add('hidden');
-
-            // 渲染带拼音的句子
-            const sentenceDiv = document.getElementById('sentence-display');
-            sentenceDiv.innerHTML = q.pinyin.map((p, i) => `
-                <div class="ruby-container">
-                    <span class="pinyin">${p}</span>
-                    <span class="char">${q.chars[i]}</span>
-                </div>
-            `).join('');
-
-            // 渲染三选一图片选项
-            const optionsDiv = document.getElementById('options-display');
-            optionsDiv.innerHTML = q.options.map(opt => `
-                <button onclick="checkAnswer('${opt.id}')" class="group relative border-4 border-transparent hover:border-blue-500 rounded-xl overflow-hidden transition-all shadow-sm">
-                    <img src="${opt.img}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform">
-                    <div class="bg-gray-100 text-center py-2 font-bold group-hover:bg-blue-500 group-hover:text-white">${opt.id}</div>
-                </button>
-            `).join('');
-            
-            document.getElementById('score').innerText = `Progress: ${Math.round((currentIdx / questions.length) * 100)}%`;
-        }
-
-        function checkAnswer(selectedId) {
-            const q = questions[currentIdx];
-            const feedback = document.getElementById('feedback');
-            const isCorrect = selectedId === q.answer;
-
-            feedback.className = `mt-8 text-xl font-bold text-center ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
-            feedback.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 不对哦，再想想。Try again.";
-            feedback.classList.remove('hidden');
-
-            if (isCorrect) {
-                setTimeout(() => {
-                    currentIdx++;
-                    renderQuestion();
-                }, 1500);
-            }
-        }
-
-        // 初始化加载
-        loadQuizData();
-    </script>
-</body>
-</html>
+[
+  {
+    "id": 1,
+    "type": "Reading_Type_1",
+    "pinyin": ["tā", "shì", "dà", "xué", "shēng"],
+    "chars": ["他", "是", "大", "学", "生"],
+    "options": [
+      {"id": "A", "img": "assets/images/primary.jpg", "desc": "Elementary"},
+      {"id": "B", "img": "assets/images/university.jpg", "desc": "University"},
+      {"id": "C", "img": "assets/images/doctor.jpg", "desc": "Doctor"}
+    ],
+    "answer": "B"
+  },
+  {
+    "id": 2,
+    "type": "Reading_Type_1",
+    "pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi"],
+    "chars": ["你", "叫", "什", "么", "名", "字"],
+    "options": [
+      {"id": "A", "img": "assets/images/intro.jpg", "desc": "Greeting"},
+      {"id": "B", "img": "assets/images/five.jpg", "desc": "Five"},
+      {"id": "C", "img": "assets/images/teacher.jpg", "desc": "Teacher"}
+    ],
+    "answer": "A"
+  }
+]
