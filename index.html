@@ -3,114 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 1 自测 MVP - HBZ Edition</title>
+    <title>HSK 1 自测系统 (MVP)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .pinyin { font-size: 0.8rem; color: #666; display: block; line-height: 1; }
-        .char { font-size: 1.5rem; display: block; }
-        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; }
+        .pinyin { font-size: 0.9rem; color: #666; margin-bottom: -2px; }
+        .char { font-size: 1.8rem; font-weight: 500; }
+        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 5px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<body class="bg-gray-50 min-h-screen p-4 flex flex-col items-center">
 
-    <div class="w-full max-w-md bg-white rounded-full h-2.5 mb-6">
-        <div id="progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 10%"></div>
+    <div class="w-full max-w-2xl flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-gray-800">HSK 1 Reading Test</h1>
+        <div id="score" class="text-blue-600 font-bold">Progress: 0%</div>
     </div>
 
-    <div id="quiz-container" class="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-        <div id="question-header" class="mb-4 text-sm text-gray-500 font-bold uppercase">Reading Type 1</div>
-        
-        <div id="sentence-area" class="mb-6 text-center py-4 bg-blue-50 rounded-lg">
+    <div id="quiz-box" class="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div id="sentence-display" class="flex flex-wrap justify-center mb-10 min-h-[80px]">
             </div>
 
-        <div id="options-area" class="grid grid-cols-1 gap-4">
+        <div id="options-display" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             </div>
     </div>
 
-    <div id="feedback" class="mt-6 hidden text-center font-bold text-lg"></div>
+    <div id="feedback" class="mt-8 text-xl font-bold hidden"></div>
 
     <script>
-        // 你的 33个词与语法点题库 (MVP 示例)
-        const quizData = [
-            {
-                type: "Reading Type 1",
-                sentence: [
-                    {p: "tā", c: "他"}, {p: "shì", c: "是"}, {p: "yī", c: "一"}, {p: "shēng", c: "生"}
-                ],
-                options: [
-                    {id: 'A', img: 'assets/images/doctor.jpg', label: 'Doctor'}, // 替换为你的 MJ 图片路径
-                    {id: 'B', img: 'assets/images/student.jpg', label: 'Student'}
-                ],
-                answer: 'A'
-            },
-            {
-                type: "Reading Type 3",
-                sentence: [
-                    {p: "nǐ", c: "你"}, {p: "jiào", c: "叫"}, {p: "shén", c: "什"}, {p: "me", c: "么"}, {p: "___", c: "___"}, {p: "?", c: "?"}
-                ],
-                options: [
-                    {id: 'A', text: '名字 (Name)'},
-                    {id: 'B', text: '老师 (Teacher)'}
-                ],
-                answer: 'A'
-            }
-        ];
-
+        let questions = [];
         let currentIdx = 0;
 
+        // 核心步骤：从 JSON 文件读取数据
+        async function loadQuizData() {
+            try {
+                // 确保你的 GitHub 仓库里有 questions.json 这个文件
+                const response = await fetch('questions.json');
+                questions = await response.json();
+                renderQuestion();
+            } catch (err) {
+                console.error("加载题库失败:", err);
+                document.getElementById('sentence-display').innerHTML = "加载题库失败，请检查 questions.json";
+            }
+        }
+
         function renderQuestion() {
-            const q = quizData[currentIdx];
+            if (currentIdx >= questions.length) {
+                document.getElementById('quiz-box').innerHTML = "<h2 class='text-2xl text-center p-10'>恭喜！你完成了所有练习。</h2>";
+                return;
+            }
+
+            const q = questions[currentIdx];
             const feedback = document.getElementById('feedback');
             feedback.classList.add('hidden');
-            
-            document.getElementById('question-header').innerText = q.type;
-            
+
             // 渲染带拼音的句子
-            const sentenceArea = document.getElementById('sentence-area');
-            sentenceArea.innerHTML = q.sentence.map(word => `
+            const sentenceDiv = document.getElementById('sentence-display');
+            sentenceDiv.innerHTML = q.pinyin.map((p, i) => `
                 <div class="ruby-container">
-                    <span class="pinyin">${word.p}</span>
-                    <span class="char">${word.c}</span>
+                    <span class="pinyin">${p}</span>
+                    <span class="char">${q.chars[i]}</span>
                 </div>
             `).join('');
 
-            // 渲染选项
-            const optionsArea = document.getElementById('options-area');
-            optionsArea.innerHTML = '';
+            // 渲染三选一图片选项
+            const optionsDiv = document.getElementById('options-display');
+            optionsDiv.innerHTML = q.options.map(opt => `
+                <button onclick="checkAnswer('${opt.id}')" class="group relative border-4 border-transparent hover:border-blue-500 rounded-xl overflow-hidden transition-all shadow-sm">
+                    <img src="${opt.img}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform">
+                    <div class="bg-gray-100 text-center py-2 font-bold group-hover:bg-blue-500 group-hover:text-white">${opt.id}</div>
+                </button>
+            `).join('');
             
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "border-2 border-gray-200 rounded-lg p-2 hover:border-blue-500 transition-all flex flex-col items-center";
-                
-                if(opt.img) {
-                    btn.innerHTML = `<img src="${opt.img}" class="w-full h-40 object-cover rounded mb-2"><span class="font-bold">${opt.id}</span>`;
-                } else {
-                    btn.innerHTML = `<span class="text-lg py-2">${opt.text}</span>`;
-                }
-                
-                btn.onclick = () => checkAnswer(opt.id);
-                optionsArea.appendChild(btn);
-            });
+            document.getElementById('score').innerText = `Progress: ${Math.round((currentIdx / questions.length) * 100)}%`;
         }
 
-        function checkAnswer(selected) {
+        function checkAnswer(selectedId) {
+            const q = questions[currentIdx];
             const feedback = document.getElementById('feedback');
-            const isCorrect = selected === quizData[currentIdx].answer;
-            
-            feedback.innerText = isCorrect ? "✅ Correct! / 太棒了！" : "❌ Wrong / 再试一次";
-            feedback.className = `mt-6 text-center font-bold text-lg ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
+            const isCorrect = selectedId === q.answer;
+
+            feedback.className = `mt-8 text-xl font-bold text-center ${isCorrect ? 'text-green-600' : 'text-red-600'}`;
+            feedback.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 不对哦，再想想。Try again.";
             feedback.classList.remove('hidden');
 
-            if(isCorrect) {
+            if (isCorrect) {
                 setTimeout(() => {
-                    currentIdx = (currentIdx + 1) % quizData.length;
+                    currentIdx++;
                     renderQuestion();
-                    document.getElementById('progress').style.width = ((currentIdx + 1) / quizData.length * 100) + '%';
                 }, 1500);
             }
         }
 
-        renderQuestion();
+        // 初始化加载
+        loadQuizData();
     </script>
 </body>
 </html>
