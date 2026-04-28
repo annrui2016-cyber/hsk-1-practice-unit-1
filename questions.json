@@ -5,11 +5,11 @@
     "audio": "assets/audio/u01_q01.mp3",
     "show_text": false,
     "options": [
-      {"id": "A", "img": "assets/images/u01_p01.jpg"},
-      {"id": "B", "img": "assets/images/u01_p02.jpg"},
-      {"id": "C", "img": "assets/images/u01_p03.jpg"},
-      {"id": "D", "img": "assets/images/u01_p04.jpg"},
-      {"id": "E", "img": "assets/images/u01_p05.jpg"}
+      {"id": "A", "img": "assets/images/u01_p01.png"},
+      {"id": "B", "img": "assets/images/u01_p02.png"},
+      {"id": "C", "img": "assets/images/u01_p03.png"},
+      {"id": "D", "img": "assets/images/u01_p04.png"},
+      {"id": "E", "img": "assets/images/u01_p05.png"}
     ],
     "answer": "A"
   },
@@ -19,11 +19,11 @@
     "audio": "assets/audio/u01_q02.mp3",
     "show_text": false,
     "options": [
-      {"id": "A", "img": "assets/images/u01_p01.jpg"},
-      {"id": "B", "img": "assets/images/u01_p02.jpg"},
-      {"id": "C", "img": "assets/images/u01_p03.jpg"},
-      {"id": "D", "img": "assets/images/u01_p04.jpg"},
-      {"id": "E", "img": "assets/images/u01_p05.jpg"}
+      {"id": "A", "img": "assets/images/u01_p01.png"},
+      {"id": "B", "img": "assets/images/u01_p02.png"},
+      {"id": "C", "img": "assets/images/u01_p03.png"},
+      {"id": "D", "img": "assets/images/u01_p04.png"},
+      {"id": "E", "img": "assets/images/u01_p05.png"}
     ],
     "answer": "B"
   },
@@ -33,11 +33,11 @@
     "audio": "assets/audio/u01_q03.mp3",
     "show_text": false,
     "options": [
-      {"id": "A", "img": "assets/images/u01_p01.jpg"},
-      {"id": "B", "img": "assets/images/u01_p02.jpg"},
-      {"id": "C", "img": "assets/images/u01_p03.jpg"},
-      {"id": "D", "img": "assets/images/u01_p04.jpg"},
-      {"id": "E", "img": "assets/images/u01_p05.jpg"}
+      {"id": "A", "img": "assets/images/u01_p01.png"},
+      {"id": "B", "img": "assets/images/u01_p02.png"},
+      {"id": "C", "img": "assets/images/u01_p03.png"},
+      {"id": "D", "img": "assets/images/u01_p04.png"},
+      {"id": "E", "img": "assets/images/u01_p05.png"}
     ],
     "answer": "C"
   },
@@ -47,11 +47,11 @@
     "audio": "assets/audio/u01_q04.mp3",
     "show_text": false,
     "options": [
-      {"id": "A", "img": "assets/images/u01_p01.jpg"},
-      {"id": "B", "img": "assets/images/u01_p02.jpg"},
-      {"id": "C", "img": "assets/images/u01_p03.jpg"},
-      {"id": "D", "img": "assets/images/u01_p04.jpg"},
-      {"id": "E", "img": "assets/images/u01_p05.jpg"}
+      {"id": "A", "img": "assets/images/u01_p01.png"},
+      {"id": "B", "img": "assets/images/u01_p02.png"},
+      {"id": "C", "img": "assets/images/u01_p03.png"},
+      {"id": "D", "img": "assets/images/u01_p04.png"},
+      {"id": "E", "img": "assets/images/u01_p05.png"}
     ],
     "answer": "D"
   },
@@ -61,11 +61,11 @@
     "audio": "assets/audio/u01_q05.mp3",
     "show_text": false,
     "options": [
-      {"id": "A", "img": "assets/images/u01_p01.jpg"},
-      {"id": "B", "img": "assets/images/u01_p02.jpg"},
-      {"id": "C", "img": "assets/images/u01_p03.jpg"},
-      {"id": "D", "img": "assets/images/u01_p04.jpg"},
-      {"id": "E", "img": "assets/images/u01_p05.jpg"}
+      {"id": "A", "img": "assets/images/u01_p01.png"},
+      {"id": "B", "img": "assets/images/u01_p02.png"},
+      {"id": "C", "img": "assets/images/u01_p03.png"},
+      {"id": "D", "img": "assets/images/u01_p04.png"},
+      {"id": "E", "img": "assets/images/u01_p05.png"}
     ],
     "answer": "E"
   }
