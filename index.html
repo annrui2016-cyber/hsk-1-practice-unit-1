@@ -3,50 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 1 在线自测系统</title>
+    <title>HSK 3.0 Level 1 在线测试系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 6px; }
         .pinyin { font-size: 0.85rem; color: #6b7280; line-height: 1; margin-bottom: 2px; }
         .char { font-size: 1.8rem; font-weight: 500; color: #1f2937; }
-        .option-sentence .char { font-size: 1.4rem; }
+        .option-sentence .char { font-size: 1.2rem; }
+        .option-sentence .pinyin { font-size: 0.7rem; }
+        /* 针对图片选项的特殊间距优化 */
+        .img-option { aspect-ratio: 1 / 1; width: 100%; object-fit: cover; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 md:p-8">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 md:p-8 font-sans">
 
-    <div class="w-full max-w-3xl flex justify-between items-center mb-6">
-        <div class="text-lg font-bold text-slate-700">HSK 3.0 Level 1</div>
-        <div id="progress-text" class="text-blue-600 font-semibold">进度: 0/0</div>
+    <div class="w-full max-w-5xl flex justify-between items-center mb-6">
+        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
+            <span class="text-slate-400 text-xs font-bold uppercase">HSK 3.0</span>
+            <span class="ml-2 text-slate-800 font-bold">Level 1 Unit Practice</span>
+        </div>
+        <div id="progress-text" class="text-blue-600 font-black text-lg">进度: 0/0</div>
     </div>
 
-    <div id="quiz-card" class="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-slate-100">
-        <div id="sentence-display" class="flex flex-col items-center justify-center mb-10 min-h-[120px] py-8 bg-slate-50 rounded-2xl">
-            <div class="text-slate-400">正在加载...</div>
+    <div id="quiz-card" class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-12 border border-slate-100 transition-all">
+        
+        <div id="sentence-display" class="flex flex-col items-center justify-center mb-10 min-h-[140px] py-10 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+            <div class="text-slate-400 italic">正在准备题目素材...</div>
         </div>
 
-        <div id="options-display" class="grid gap-6"></div>
+        <div id="options-display" class="grid gap-4 md:gap-6">
+            </div>
     </div>
 
-    <div id="feedback" class="mt-8 px-8 py-3 rounded-full font-bold text-lg hidden transition-all duration-300"></div>
+    <div id="feedback" class="mt-8 px-10 py-4 rounded-full font-bold text-xl hidden shadow-xl transition-all animate-bounce"></div>
 
     <script>
         let questions = [];
         let currentIdx = 0;
-        let currentAudio = null; // 用于控制音频
+        let currentAudio = null;
 
         async function loadData() {
             try {
-                const response = await fetch('./questions.json?t=' + Date.now());
+                // 增加时间戳，防止浏览器缓存导致不更新题目
+                const response = await fetch('./questions.json?v=' + Date.now());
                 questions = await response.json();
                 renderQuestion();
             } catch (err) {
-                document.getElementById('sentence-display').innerHTML = "❌ 加载失败，请检查 questions.json";
+                document.getElementById('sentence-display').innerHTML = `<span class="text-red-500 font-bold">❌ 题库文件 questions.json 格式错误或缺失</span>`;
             }
         }
 
         function renderQuestion() {
             if (currentIdx >= questions.length) {
-                document.getElementById('quiz-card').innerHTML = "<div class='text-center py-10'><h2 class='text-2xl font-bold'>练习完成！</h2><button onclick='location.reload()' class='mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg'>重试</button></div>";
+                document.getElementById('quiz-card').innerHTML = `
+                    <div class="text-center py-16">
+                        <div class="text-6xl mb-6">🏆</div>
+                        <h2 class="text-3xl font-black text-slate-800 mb-2">测试完成！</h2>
+                        <p class="text-slate-500 mb-8">Excellent job! You've mastered these words.</p>
+                        <button onclick="location.reload()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">重新开始 (Restart)</button>
+                    </div>`;
                 return;
             }
 
@@ -54,13 +69,16 @@
             document.getElementById('progress-text').innerText = `进度: ${currentIdx + 1}/${questions.length}`;
             
             const sentenceDiv = document.getElementById('sentence-display');
-            sentenceDiv.innerHTML = ''; // 清空上一题
+            sentenceDiv.innerHTML = ''; 
 
-            // 1. 处理听力音频
+            // 1. 【听力逻辑】处理音频播放
             if (q.audio) {
                 const audioBtn = document.createElement('button');
-                audioBtn.className = "flex items-center px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all mb-6 shadow-lg active:scale-95";
-                audioBtn.innerHTML = `<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg><span>播放录音 (Play Audio)</span>`;
+                audioBtn.className = "flex items-center px-10 py-5 bg-blue-600 text-white rounded-3xl hover:bg-blue-700 transition-all mb-4 shadow-xl active:scale-95 group";
+                audioBtn.innerHTML = `
+                    <svg class="w-8 h-8 mr-3 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
+                    <span class="text-xl font-black uppercase tracking-tight">播放音频 (Listen)</span>
+                `;
                 
                 audioBtn.onclick = () => {
                     if(currentAudio) currentAudio.pause();
@@ -68,49 +86,8 @@
                     currentAudio.play();
                 };
                 sentenceDiv.appendChild(audioBtn);
-            }
-
-            // 2. 渲染文字题干（如果是听力题，这里通常作为参考或默认不显示，根据您的需求自定）
-            const targetP = q.q_pinyin || q.pinyin || [];
-            const targetC = q.q_chars || q.chars || [];
-            const textWrap = document.createElement('div');
-            textWrap.className = "flex flex-wrap justify-center";
-            textWrap.innerHTML = targetP.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${targetC[i]}</span></div>`).join('');
-            sentenceDiv.appendChild(textWrap);
-
-            // 3. 渲染选项
-            const optionsDiv = document.getElementById('options-display');
-            const isTextType = q.options[0].p !== undefined;
-
-            if (isTextType) {
-                optionsDiv.className = "grid grid-cols-1 gap-4";
-                optionsDiv.innerHTML = q.options.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-5 bg-white border-2 border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group text-left">
-                        <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded-full font-black text-slate-400 group-hover:bg-blue-500 group-hover:text-white mr-4">${opt.id}</div>
-                        <div class="flex flex-wrap option-sentence">${opt.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${opt.c[i]}</span></div>`).join('')}</div>
-                    </button>`).join('');
-            } else {
-                optionsDiv.className = "grid grid-cols-1 md:grid-cols-3 gap-6";
-                optionsDiv.innerHTML = q.options.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-2xl overflow-hidden hover:border-blue-500 transition-all shadow-sm">
-                        <div class="aspect-square w-full"><img src="${opt.img}" class="w-full h-full object-cover"></div>
-                        <div class="py-3 bg-slate-50 font-black group-hover:bg-blue-500 group-hover:text-white text-center">${opt.id}</div>
-                    </button>`).join('');
-            }
-            document.getElementById('feedback').classList.add('hidden');
-        }
-
-        function checkAnswer(selectedId) {
-            const q = questions[currentIdx];
-            const isCorrect = selectedId === q.answer;
-            const fb = document.getElementById('feedback');
-            fb.className = `mt-8 px-8 py-3 rounded-full font-bold text-lg text-white text-center shadow-lg transition-all ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`;
-            fb.innerText = isCorrect ? "✅ 正确！Correct!" : "❌ 不对哦！Try again.";
-            fb.classList.remove('hidden');
-            if (isCorrect) setTimeout(() => { currentIdx++; renderQuestion(); }, 1200);
-        }
-
-        loadData();
-    </script>
-</body>
-</html>
+                
+                // 听力题隐藏文字题干的逻辑：如果 JSON 里没说要强制显示，就隐藏
+                if (!q.show_text) {
+                    const tip = document.createElement('p');
+                    tip.
