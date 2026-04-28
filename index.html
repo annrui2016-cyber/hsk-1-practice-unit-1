@@ -90,4 +90,57 @@
                 // 听力题隐藏文字题干的逻辑：如果 JSON 里没说要强制显示，就隐藏
                 if (!q.show_text) {
                     const tip = document.createElement('p');
-                    tip.
+                    tip.className = "text-slate-400 text-sm font-bold mt-2";
+                    tip.innerText = "Listening Mode: Text is hidden";
+                    sentenceDiv.appendChild(tip);
+                }
+            }
+
+            // 2. 【渲染题干】（如果是听力且 show_text 不为 true，则不渲染文字部分）
+            if (!q.audio || (q.audio && q.show_text)) {
+                const targetP = q.q_pinyin || q.pinyin || [];
+                const targetC = q.q_chars || q.chars || [];
+                const textWrap = document.createElement('div');
+                textWrap.className = "flex flex-wrap justify-center px-4";
+                textWrap.innerHTML = targetP.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${targetC[i]}</span></div>`).join('');
+                sentenceDiv.appendChild(textWrap);
+            }
+
+            // 3. 【渲染选项】
+            const optionsDiv = document.getElementById('options-display');
+            const isTextType = q.options[0].p !== undefined;
+
+            if (isTextType) {
+                // 文字选项布局：单列大按钮
+                optionsDiv.className = "grid grid-cols-1 gap-4 max-w-2xl mx-auto w-full";
+                optionsDiv.innerHTML = q.options.map(opt => `
+                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-6 bg-white border-2 border-slate-100 rounded-[1.5rem] hover:border-blue-500 hover:bg-blue-50 transition-all group shadow-sm">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded-2xl font-black text-slate-500 group-hover:bg-blue-500 group-hover:text-white mr-6 text-xl transition-colors">${opt.id}</div>
+                        <div class="flex flex-wrap option-sentence">${opt.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${opt.c[i]}</span></div>`).join('')}</div>
+                    </button>`).join('');
+            } else {
+                // 图片选项布局：移动端 2 列，PC端 5 列
+                optionsDiv.className = "grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6";
+                optionsDiv.innerHTML = q.options.map(opt => `
+                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-[2rem] overflow-hidden hover:border-blue-500 transition-all shadow-md hover:shadow-xl">
+                        <div class="w-full aspect-square"><img src="${opt.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="py-4 bg-slate-50 font-black text-2xl group-hover:bg-blue-500 group-hover:text-white text-center transition-colors border-t border-slate-100">${opt.id}</div>
+                    </button>`).join('');
+            }
+            document.getElementById('feedback').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedId) {
+            const q = questions[currentIdx];
+            const isCorrect = selectedId === q.answer;
+            const fb = document.getElementById('feedback');
+            fb.className = `mt-8 px-10 py-4 rounded-full font-black text-xl text-white text-center shadow-2xl transition-all ${isCorrect ? 'bg-green-500 scale-110' : 'bg-red-500 animate-shake'}`;
+            fb.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 不对哦！Try Again";
+            fb.classList.remove('hidden');
+            if (isCorrect) setTimeout(() => { currentIdx++; renderQuestion(); }, 1200);
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
