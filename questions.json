@@ -1,16 +1,28 @@
-{
-  "unit": "Unit 1 Practice",
-  "sections": [
-    {
-      "section_type": "Matching_Images", // 题型：听/读配图
-      "instructions": "听录音，选择相应的图片",
-      "items": [
-        {"id": 1, "audio": "q1.mp3", "text": "他是医生。", "answer_img": "doctor.jpg"},
-        {"id": 2, "audio": "q2.mp3", "text": "我是学生。", "answer_img": "student.jpg"},
-        {"id": 3, "audio": "q3.mp3", "text": "你好。", "answer_img": "hello.jpg"},
-        {"id": 4, "audio": "q4.mp3", "text": "谢谢。", "answer_img": "thanks.jpg"},
-        {"id": 5, "audio": "q5.mp3", "text": "再见。", "answer_img": "bye.jpg"}
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": 9,
+    "type": "Listening_Type_1",
+    "audio": "assets/audio/q1.mp3",
+    "pinyin": ["tā", "shì", "lǎo", "shī"],
+    "chars": ["他", "是", "老", "师"],
+    "options": [
+      {"id": "A", "img": "https://images.unsplash.com/photo-1577896851231-70ef14603e80?auto=format&fit=crop&w=400&q=80", "desc": "Teacher"},
+      {"id": "B", "img": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80", "desc": "Doctor"},
+      {"id": "C", "img": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80", "desc": "Students"}
+    ],
+    "answer": "A"
+  },
+  {
+    "id": 10,
+    "type": "Listening_Type_2",
+    "audio": "assets/audio/q2.mp3",
+    "q_pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi", "?"],
+    "q_chars": ["你", "叫", "什", "么", "名", "字", "？"],
+    "options": [
+      {"id": "A", "p": ["wǒ", "jiào", "ā", "lǐ"], "c": ["我", "叫", "阿", "里"]},
+      {"id": "B", "p": ["xiè", "xie"], "c": ["谢", "谢"]},
+      {"id": "C", "p": ["zài", "jiàn"], "c": ["再", "见"]}
+    ],
+    "answer": "A"
+  }
+]
