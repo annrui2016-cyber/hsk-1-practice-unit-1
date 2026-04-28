@@ -8,10 +8,32 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; background-color: #f1f5f9; display: flex; flex-direction: column; }
-        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; }
-        .img-box { aspect-ratio: 1/1; width: 100%; max-height: 200px; overflow: hidden; }
-        img { width: 100%; height: 100%; object-fit: cover; }
-        @media (max-width: 768px) { body { overflow-y: auto; height: auto; } .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+        
+        /* 强制 5 列布局，确保同屏 */
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; }
+        
+        /* 图片框：改为 contain 模式，确保图片不被裁剪 */
+        .img-box { 
+            aspect-ratio: 1/1; 
+            width: 100%; 
+            max-height: 220px; 
+            overflow: hidden; 
+            background-color: #f8fafc; /* 图片未填满处的背景色 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-box img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; /* 保证图片完整显示 */
+        }
+
+        @media (max-width: 768px) {
+            body { overflow-y: auto; height: auto; }
+            .grid-5 { grid-template-columns: repeat(2, 1fr); }
+        }
+
         .animate-shake { animation: shake 0.4s both; }
         @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-3px); } }
     </style>
@@ -28,7 +50,7 @@
 
     <main id="quiz-card" class="flex-grow w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center border border-slate-200">
         <div id="sentence-display" class="w-full py-4 mb-4 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
-            <div id="loading-tip" class="text-slate-400 text-sm italic">数据加载中...</div>
+            <div id="loading-tip" class="text-slate-400 text-sm italic">准备中...</div>
         </div>
         <div id="options-display" class="grid-5"></div>
     </main>
@@ -37,27 +59,38 @@
         let questions = [];
         let currentIdx = 0;
         let currentAudio = null;
+        let globalShuffledOptions = []; // 存储本轮测试固定的随机顺序
+
+        // 洗牌算法
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
 
         async function loadData() {
             try {
                 const response = await fetch('./questions.json?v=' + Date.now());
-                if (!response.ok) throw new Error('File not found');
                 questions = await response.json();
+                
+                // --- 关键：初始加载时生成一次全局随机顺序 ---
                 if (questions.length > 0) {
+                    // 假设所有题目的选项池是一样的（Part 1 的 5 张图）
+                    globalShuffledOptions = shuffle(questions[0].options);
                     renderQuestion();
-                } else {
-                    document.getElementById('loading-tip').innerText = "题库为空";
                 }
             } catch (e) {
-                console.error("Load Error:", e);
-                document.getElementById('loading-tip').innerText = "❌ 无法读取 questions.json，请检查文件";
+                document.getElementById('loading-tip').innerText = "❌ 加载失败";
             }
         }
 
         function renderQuestion() {
             const quizCard = document.getElementById('quiz-card');
-            const sentenceDiv = document.getElementById('sentence-display');
             const optionsDiv = document.getElementById('options-display');
+            const sentenceDiv = document.getElementById('sentence-display');
 
             if (currentIdx >= questions.length) {
                 quizCard.innerHTML = `
@@ -71,14 +104,12 @@
 
             const q = questions[currentIdx];
             document.getElementById('progress-text').innerText = `${currentIdx + 1}/${questions.length}`;
-            
             sentenceDiv.innerHTML = '';
 
-            // 音频按钮逻辑
             if (q.audio) {
                 const btn = document.createElement('button');
                 btn.className = "flex items-center px-6 py-2.5 bg-slate-900 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all active:scale-95";
-                btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span class="text-sm font-bold uppercase tracking-tight">第 ${currentIdx + 1} 题 - 点击播放</span>`;
+                btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span class="text-sm font-bold uppercase tracking-tight">第 ${currentIdx + 1} 题 - 播放音频</span>`;
                 btn.onclick = () => { 
                     if(currentAudio) currentAudio.pause(); 
                     currentAudio = new Audio(q.audio); 
@@ -87,9 +118,9 @@
                 sentenceDiv.appendChild(btn);
             }
 
-            // 选项渲染
-            optionsDiv.innerHTML = q.options.map(o => `
-                <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="group bg-white border-2 border-slate-100 rounded-2xl overflow-hidden hover:border-blue-500 shadow-sm transition-all relative">
+            // 渲染选项：使用本轮固定的 globalShuffledOptions
+            optionsDiv.innerHTML = globalShuffledOptions.map(o => `
+                <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="group bg-white border-2 border-slate-100 rounded-xl overflow-hidden hover:border-blue-500 shadow-sm transition-all relative">
                     <div class="img-box"><img src="${o.img}"></div>
                     <div class="py-2 bg-slate-50 font-black text-lg group-hover:bg-blue-600 group-hover:text-white text-center border-t border-slate-100">${o.id}</div>
                 </button>`).join('');
@@ -107,6 +138,7 @@
             } else {
                 new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play().catch(()=>{});
                 el.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
+                // 允许重试逻辑
                 setTimeout(() => {
                     el.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
                 }, 800);
