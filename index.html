@@ -3,62 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 1 Test - Screen Fit</title>
+    <title>HSK 1 Listening</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; }
-        .pinyin { font-size: 0.65rem; color: #64748b; line-height: 1; }
-        .char { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; background-color: #f1f5f9; display: flex; flex-direction: column; }
         
-        /* 强制 5 列布局，并限制单张图片的最大高度 */
-        .grid-5-cols { 
-            display: grid; 
-            grid-template-columns: repeat(5, minmax(0, 1fr)); 
-            gap: 10px; 
-            width: 100%; 
-            max-width: 1000px;
-        }
-        .img-container {
-            aspect-ratio: 1 / 1;
-            width: 100%;
-            max-height: 180px; /* 关键：限制高度防止撑开页面 */
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        /* 强制 5 列布局 */
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; }
+        .img-box { aspect-ratio: 1/1; width: 100%; max-height: 200px; overflow: hidden; }
         img { width: 100%; height: 100%; object-fit: cover; }
 
         @media (max-width: 768px) {
             body { overflow-y: auto; height: auto; }
-            .grid-5-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .img-container { max-height: none; }
+            .grid-5 { grid-template-columns: repeat(2, 1fr); }
         }
 
         .animate-shake { animation: shake 0.4s both; }
         @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-3px); } }
     </style>
 </head>
-<body class="bg-slate-100 p-2 md:p-4">
+<body class="p-2 md:p-3">
 
-    <header class="w-full max-w-5xl mx-auto mb-2">
-        <div class="bg-white/90 backdrop-blur rounded-xl shadow-sm p-3 border border-slate-200 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-1.5 rounded-lg text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-width="2"/></svg>
-                </div>
-                <h1 class="text-lg font-black text-slate-800 leading-none">Listening <span class="text-slate-400 font-medium">Part 1</span></h1>
-            </div>
-            <div id="progress-text" class="text-2xl font-black text-blue-600 tabular-nums">0/5</div>
+    <div class="w-full max-w-6xl mx-auto flex justify-between items-center bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 mb-2">
+        <div class="flex flex-col">
+            <span class="text-[10px] text-blue-600 font-bold tracking-tight uppercase">HSK1 - Unit 1: Meeting Each Other</span>
+            <h1 class="text-base font-black text-slate-800">Listening 听力 <span class="text-slate-400 font-medium text-xs ml-1">(1-5题)</span></h1>
         </div>
-    </header>
+        <div id="progress-text" class="text-xl font-black text-blue-600 tabular-nums">0/5</div>
+    </div>
 
-    <main id="quiz-card" class="flex-grow w-full max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center border border-slate-200 overflow-hidden">
-        <div id="sentence-display" class="w-full py-4 mb-4 bg-slate-50 rounded-xl flex flex-col items-center justify-center border border-slate-100">
+    <main id="quiz-card" class="flex-grow w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center border border-slate-200">
+        <div id="sentence-display" class="w-full py-4 mb-4 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
             </div>
-        <div id="options-display" class="grid-5-cols">
+        
+        <div id="options-display" class="grid-5">
             </div>
     </main>
 
@@ -67,36 +46,21 @@
         let currentIdx = 0;
         let currentAudio = null;
 
-        function playFeedback(isCorrect) {
-            const audio = new Audio(isCorrect ? 'https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3' : 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
-            audio.volume = 0.2;
-            audio.play();
-        }
-
-        function shuffleArray(array) {
-            let shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
         async function loadData() {
             try {
                 const res = await fetch('./questions.json?v=' + Date.now());
-                questions = await res.json();
+                questions = await response.ok ? await res.json() : [];
                 renderQuestion();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Load Error"); }
         }
 
         function renderQuestion() {
             if (currentIdx >= questions.length) {
                 document.getElementById('quiz-card').innerHTML = `
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">🎯</div>
+                    <div class="text-center py-10">
+                        <div class="text-6xl mb-4">🎯</div>
                         <h2 class="text-2xl font-black mb-6">第一部分完成！</h2>
-                        <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg">继续做 Part 2</button>
+                        <button onclick="location.reload()" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg">继续做 Part 2</button>
                     </div>`;
                 return;
             }
@@ -106,52 +70,42 @@
             const sentenceDiv = document.getElementById('sentence-display');
             sentenceDiv.innerHTML = '';
 
+            // 音频按钮
             if (q.audio) {
                 const btn = document.createElement('button');
-                btn.className = "flex items-center px-5 py-2.5 bg-slate-900 text-white rounded-lg shadow hover:bg-blue-600 transition-all active:scale-95";
-                btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span class="text-sm font-bold">第 ${currentIdx + 1} 题 - 播放音频</span>`;
+                btn.className = "flex items-center px-6 py-2.5 bg-slate-900 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all active:scale-95";
+                btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span class="text-sm font-bold uppercase tracking-tight">第 ${currentIdx + 1} 题 - 点击播放</span>`;
                 btn.onclick = () => { if(currentAudio) currentAudio.pause(); currentAudio = new Audio(q.audio); currentAudio.play(); };
                 sentenceDiv.appendChild(btn);
             }
 
+            // 渲染选项：直接使用 q.options，不再乱序
             const optionsDiv = document.getElementById('options-display');
-            const isText = q.options[0].p !== undefined;
-            const shuffled = shuffleArray(q.options);
-
-            if (isText) {
-                optionsDiv.className = "flex flex-col space-y-2 w-full max-w-md";
-                optionsDiv.innerHTML = shuffled.map(o => `
-                    <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="flex items-center p-3 bg-white border border-slate-200 rounded-lg hover:border-blue-500 text-left transition-all group">
-                        <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded text-xs font-black mr-3 group-hover:bg-blue-500 group-hover:text-white">${o.id}</div>
-                        <div class="flex flex-wrap">${o.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${o.c[i]}</span></div>`).join('')}</div>
-                    </button>`).join('');
-            } else {
-                optionsDiv.className = "grid-5-cols";
-                optionsDiv.innerHTML = shuffled.map(o => `
-                    <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-blue-500 shadow-sm transition-all">
-                        <div class="img-container"><img src="${o.img}"></div>
-                        <div class="py-1.5 bg-slate-50 font-black text-sm group-hover:bg-blue-600 group-hover:text-white text-center border-t border-slate-100">${o.id}</div>
-                    </button>`).join('');
-            }
+            optionsDiv.innerHTML = q.options.map(o => `
+                <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="group bg-white border-2 border-slate-100 rounded-2xl overflow-hidden hover:border-blue-500 shadow-sm transition-all relative">
+                    <div class="img-box"><img src="${o.img}"></div>
+                    <div class="py-2 bg-slate-50 font-black text-lg group-hover:bg-blue-600 group-hover:text-white text-center border-t border-slate-100">${o.id}</div>
+                </button>`).join('');
         }
 
         function check(id, el) {
             const q = questions[currentIdx];
             const isCorrect = id === q.answer;
-            const btns = document.querySelectorAll('#options-display button');
-            btns.forEach(b => b.style.pointerEvents = 'none');
-            
-            playFeedback(isCorrect);
+
             if (isCorrect) {
+                // 答对了：锁定所有按钮，亮绿灯，下一题
+                document.querySelectorAll('#options-display button').forEach(b => b.style.pointerEvents = 'none');
+                new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3').play();
                 el.classList.add('ring-4', 'ring-green-400', 'border-green-500');
                 setTimeout(() => { currentIdx++; renderQuestion(); }, 1000);
             } else {
-                el.classList.add('animate-shake', 'border-red-500');
+                // 答错了：不锁定，只红灯震动，让学生继续尝试
+                new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play();
+                el.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
+                // 1秒后自动移除错误样式，方便重试
                 setTimeout(() => {
-                    const correct = document.getElementById(`opt-${q.answer}`);
-                    if(correct) correct.classList.add('ring-4', 'ring-green-400', 'border-green-500');
-                    setTimeout(() => { currentIdx++; renderQuestion(); }, 1200);
-                }, 400);
+                    el.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
+                }, 800);
             }
         }
         loadData();
