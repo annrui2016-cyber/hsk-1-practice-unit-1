@@ -3,100 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 3.0 Level 1 在线测试系统</title>
+    <title>HSK 3.0 在线测试系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 6px; }
-        .pinyin { font-size: 0.85rem; color: #6b7280; line-height: 1; margin-bottom: 2px; }
-        .char { font-size: 1.8rem; font-weight: 500; color: #1f2937; }
-        .option-sentence .char { font-size: 1.2rem; }
-        .option-sentence .pinyin { font-size: 0.7rem; }
-        /* 针对图片选项的特殊间距优化 */
-        .img-option { aspect-ratio: 1 / 1; width: 100%; object-fit: cover; }
+        .pinyin { font-size: 0.8rem; color: #6b7280; line-height: 1; margin-bottom: 2px; }
+        .char { font-size: 1.6rem; font-weight: 500; color: #1f2937; }
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 md:p-8 font-sans">
 
-    <div class="w-full max-w-5xl flex justify-between items-center mb-6">
-        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
-            <span class="text-slate-400 text-xs font-bold uppercase">HSK 3.0</span>
-            <span class="ml-2 text-slate-800 font-bold">Level 1 Unit Practice</span>
-        </div>
-        <div id="progress-text" class="text-blue-600 font-black text-lg">进度: 0/0</div>
-    </div>
-
-    <div id="quiz-card" class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-12 border border-slate-100 transition-all">
-        
-        <div id="sentence-display" class="flex flex-col items-center justify-center mb-10 min-h-[140px] py-10 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-            <div class="text-slate-400 italic">正在准备题目素材...</div>
-        </div>
-
-        <div id="options-display" class="grid gap-4 md:gap-6">
+    <div class="w-full max-w-5xl mb-8">
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 id="sub-title" class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-1">HSK1 - Unit 1 - Meeting Each Other</h2>
+                <h1 id="main-title" class="text-3xl font-black text-slate-800">Listening 听力</h1>
+                <p id="section-info" class="text-slate-500 font-medium mt-1">第一部分（1-5题）</p>
             </div>
+            <div id="progress-text" class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200 text-blue-600 font-black text-xl">0/0</div>
+        </div>
     </div>
 
-    <div id="feedback" class="mt-8 px-10 py-4 rounded-full font-bold text-xl hidden shadow-xl transition-all animate-bounce"></div>
+    <div id="quiz-card" class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-10 border border-slate-100">
+        <div id="sentence-display" class="flex flex-col items-center justify-center mb-8 min-h-[140px] py-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+            <div class="text-slate-400">正在准备素材...</div>
+        </div>
+        <div id="options-display" class="grid gap-4 md:gap-6"></div>
+    </div>
+
+    <div id="feedback" class="mt-6 px-10 py-4 rounded-full font-bold text-lg hidden shadow-xl transition-all"></div>
 
     <script>
         let questions = [];
         let currentIdx = 0;
         let currentAudio = null;
 
+        // 洗牌算法：用于打乱选项顺序
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
         async function loadData() {
             try {
-                // 增加时间戳，防止浏览器缓存导致不更新题目
                 const response = await fetch('./questions.json?v=' + Date.now());
                 questions = await response.json();
                 renderQuestion();
             } catch (err) {
-                document.getElementById('sentence-display').innerHTML = `<span class="text-red-500 font-bold">❌ 题库文件 questions.json 格式错误或缺失</span>`;
+                document.getElementById('sentence-display').innerHTML = `<span class="text-red-500 font-bold">❌ 题库加载失败</span>`;
             }
         }
 
         function renderQuestion() {
             if (currentIdx >= questions.length) {
-                document.getElementById('quiz-card').innerHTML = `
-                    <div class="text-center py-16">
-                        <div class="text-6xl mb-6">🏆</div>
-                        <h2 class="text-3xl font-black text-slate-800 mb-2">测试完成！</h2>
-                        <p class="text-slate-500 mb-8">Excellent job! You've mastered these words.</p>
-                        <button onclick="location.reload()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">重新开始 (Restart)</button>
-                    </div>`;
+                document.getElementById('quiz-card').innerHTML = `<div class="text-center py-16"><h2 class="text-3xl font-black text-slate-800 mb-8">🎉 练习完成！</h2><button onclick="location.reload()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg">重新开始</button></div>`;
                 return;
             }
 
             const q = questions[currentIdx];
-            document.getElementById('progress-text').innerText = `进度: ${currentIdx + 1}/${questions.length}`;
+            document.getElementById('progress-text').innerText = `${currentIdx + 1}/${questions.length}`;
             
             const sentenceDiv = document.getElementById('sentence-display');
             sentenceDiv.innerHTML = ''; 
 
-            // 1. 【听力逻辑】处理音频播放
+            // 1. 播放音频按钮（带题号）
             if (q.audio) {
                 const audioBtn = document.createElement('button');
-                audioBtn.className = "flex items-center px-10 py-5 bg-blue-600 text-white rounded-3xl hover:bg-blue-700 transition-all mb-4 shadow-xl active:scale-95 group";
+                audioBtn.className = "flex items-center px-8 py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all mb-2 shadow-lg active:scale-95 group";
                 audioBtn.innerHTML = `
-                    <svg class="w-8 h-8 mr-3 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
-                    <span class="text-xl font-black uppercase tracking-tight">播放音频 (Listen)</span>
+                    <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
+                    <span class="text-lg font-bold">第${currentIdx + 1}题 - 播放录音 Play Audio</span>
                 `;
-                
                 audioBtn.onclick = () => {
                     if(currentAudio) currentAudio.pause();
                     currentAudio = new Audio(q.audio);
                     currentAudio.play();
                 };
                 sentenceDiv.appendChild(audioBtn);
-                
-                // 听力题隐藏文字题干的逻辑：如果 JSON 里没说要强制显示，就隐藏
                 if (!q.show_text) {
                     const tip = document.createElement('p');
-                    tip.className = "text-slate-400 text-sm font-bold mt-2";
-                    tip.innerText = "Listening Mode: Text is hidden";
+                    tip.className = "text-slate-400 text-xs font-bold mt-2";
+                    tip.innerText = "Listening Mode: Text Hidden";
                     sentenceDiv.appendChild(tip);
                 }
             }
 
-            // 2. 【渲染题干】（如果是听力且 show_text 不为 true，则不渲染文字部分）
+            // 2. 渲染文字（如果非听力或强制显示）
             if (!q.audio || (q.audio && q.show_text)) {
                 const targetP = q.q_pinyin || q.pinyin || [];
                 const targetC = q.q_chars || q.chars || [];
@@ -106,25 +104,26 @@
                 sentenceDiv.appendChild(textWrap);
             }
 
-            // 3. 【渲染选项】
+            // 3. 渲染选项（自动打乱顺序）
             const optionsDiv = document.getElementById('options-display');
             const isTextType = q.options[0].p !== undefined;
 
+            // 关键：对选项进行洗牌
+            const shuffledOptions = shuffleArray(q.options);
+
             if (isTextType) {
-                // 文字选项布局：单列大按钮
                 optionsDiv.className = "grid grid-cols-1 gap-4 max-w-2xl mx-auto w-full";
-                optionsDiv.innerHTML = q.options.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-6 bg-white border-2 border-slate-100 rounded-[1.5rem] hover:border-blue-500 hover:bg-blue-50 transition-all group shadow-sm">
-                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded-2xl font-black text-slate-500 group-hover:bg-blue-500 group-hover:text-white mr-6 text-xl transition-colors">${opt.id}</div>
+                optionsDiv.innerHTML = shuffledOptions.map(opt => `
+                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-5 bg-white border-2 border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded-xl font-black text-slate-500 group-hover:bg-blue-500 group-hover:text-white mr-5 transition-colors">${opt.id}</div>
                         <div class="flex flex-wrap option-sentence">${opt.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${opt.c[i]}</span></div>`).join('')}</div>
                     </button>`).join('');
             } else {
-                // 图片选项布局：移动端 2 列，PC端 5 列
-                optionsDiv.className = "grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6";
-                optionsDiv.innerHTML = q.options.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-[2rem] overflow-hidden hover:border-blue-500 transition-all shadow-md hover:shadow-xl">
-                        <div class="w-full aspect-square"><img src="${opt.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
-                        <div class="py-4 bg-slate-50 font-black text-2xl group-hover:bg-blue-500 group-hover:text-white text-center transition-colors border-t border-slate-100">${opt.id}</div>
+                optionsDiv.className = "grid grid-cols-2 md:grid-cols-5 gap-4";
+                optionsDiv.innerHTML = shuffledOptions.map(opt => `
+                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-3xl overflow-hidden hover:border-blue-500 transition-all shadow-md">
+                        <div class="w-full aspect-square"><img src="${opt.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"></div>
+                        <div class="py-3 bg-slate-50 font-black text-xl group-hover:bg-blue-500 group-hover:text-white text-center transition-colors border-t border-slate-100">${opt.id}</div>
                     </button>`).join('');
             }
             document.getElementById('feedback').classList.add('hidden');
@@ -134,7 +133,7 @@
             const q = questions[currentIdx];
             const isCorrect = selectedId === q.answer;
             const fb = document.getElementById('feedback');
-            fb.className = `mt-8 px-10 py-4 rounded-full font-black text-xl text-white text-center shadow-2xl transition-all ${isCorrect ? 'bg-green-500 scale-110' : 'bg-red-500 animate-shake'}`;
+            fb.className = `mt-6 px-10 py-4 rounded-full font-black text-lg text-white text-center shadow-lg transition-all ${isCorrect ? 'bg-green-500' : 'bg-red-500 animate-shake'}`;
             fb.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 不对哦！Try Again";
             fb.classList.remove('hidden');
             if (isCorrect) setTimeout(() => { currentIdx++; renderQuestion(); }, 1200);
