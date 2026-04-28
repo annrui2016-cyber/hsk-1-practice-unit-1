@@ -145,4 +145,26 @@
 
             if (isCorrect) {
                 element.classList.remove('border-slate-100');
-                element.classList.add('border-green-5
+                element.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-100');
+                setTimeout(() => {
+                    currentIdx++;
+                    renderQuestion();
+                }, 1000);
+            } else {
+                element.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
+                // 震动后显示正确答案
+                setTimeout(() => {
+                    const correctBtn = document.getElementById(`opt-${q.answer}`);
+                    if(correctBtn) correctBtn.classList.add('border-green-500', 'bg-green-50');
+                    setTimeout(() => {
+                        currentIdx++;
+                        renderQuestion();
+                    }, 1200);
+                }, 400);
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
