@@ -8,17 +8,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; background-color: #f1f5f9; display: flex; flex-direction: column; }
-        
-        /* 强制 5 列布局 */
         .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; }
         .img-box { aspect-ratio: 1/1; width: 100%; max-height: 200px; overflow: hidden; }
         img { width: 100%; height: 100%; object-fit: cover; }
-
-        @media (max-width: 768px) {
-            body { overflow-y: auto; height: auto; }
-            .grid-5 { grid-template-columns: repeat(2, 1fr); }
-        }
-
+        @media (max-width: 768px) { body { overflow-y: auto; height: auto; } .grid-5 { grid-template-columns: repeat(2, 1fr); } }
         .animate-shake { animation: shake 0.4s both; }
         @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-3px); } }
     </style>
@@ -35,10 +28,9 @@
 
     <main id="quiz-card" class="flex-grow w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center border border-slate-200">
         <div id="sentence-display" class="w-full py-4 mb-4 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
-            </div>
-        
-        <div id="options-display" class="grid-5">
-            </div>
+            <div id="loading-tip" class="text-slate-400 text-sm italic">数据加载中...</div>
+        </div>
+        <div id="options-display" class="grid-5"></div>
     </main>
 
     <script>
@@ -48,15 +40,27 @@
 
         async function loadData() {
             try {
-                const res = await fetch('./questions.json?v=' + Date.now());
-                questions = await response.ok ? await res.json() : [];
-                renderQuestion();
-            } catch (e) { console.error("Load Error"); }
+                const response = await fetch('./questions.json?v=' + Date.now());
+                if (!response.ok) throw new Error('File not found');
+                questions = await response.json();
+                if (questions.length > 0) {
+                    renderQuestion();
+                } else {
+                    document.getElementById('loading-tip').innerText = "题库为空";
+                }
+            } catch (e) {
+                console.error("Load Error:", e);
+                document.getElementById('loading-tip').innerText = "❌ 无法读取 questions.json，请检查文件";
+            }
         }
 
         function renderQuestion() {
+            const quizCard = document.getElementById('quiz-card');
+            const sentenceDiv = document.getElementById('sentence-display');
+            const optionsDiv = document.getElementById('options-display');
+
             if (currentIdx >= questions.length) {
-                document.getElementById('quiz-card').innerHTML = `
+                quizCard.innerHTML = `
                     <div class="text-center py-10">
                         <div class="text-6xl mb-4">🎯</div>
                         <h2 class="text-2xl font-black mb-6">第一部分完成！</h2>
@@ -67,20 +71,23 @@
 
             const q = questions[currentIdx];
             document.getElementById('progress-text').innerText = `${currentIdx + 1}/${questions.length}`;
-            const sentenceDiv = document.getElementById('sentence-display');
+            
             sentenceDiv.innerHTML = '';
 
-            // 音频按钮
+            // 音频按钮逻辑
             if (q.audio) {
                 const btn = document.createElement('button');
                 btn.className = "flex items-center px-6 py-2.5 bg-slate-900 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all active:scale-95";
                 btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span class="text-sm font-bold uppercase tracking-tight">第 ${currentIdx + 1} 题 - 点击播放</span>`;
-                btn.onclick = () => { if(currentAudio) currentAudio.pause(); currentAudio = new Audio(q.audio); currentAudio.play(); };
+                btn.onclick = () => { 
+                    if(currentAudio) currentAudio.pause(); 
+                    currentAudio = new Audio(q.audio); 
+                    currentAudio.play(); 
+                };
                 sentenceDiv.appendChild(btn);
             }
 
-            // 渲染选项：直接使用 q.options，不再乱序
-            const optionsDiv = document.getElementById('options-display');
+            // 选项渲染
             optionsDiv.innerHTML = q.options.map(o => `
                 <button id="opt-${o.id}" onclick="check('${o.id}', this)" class="group bg-white border-2 border-slate-100 rounded-2xl overflow-hidden hover:border-blue-500 shadow-sm transition-all relative">
                     <div class="img-box"><img src="${o.img}"></div>
@@ -90,24 +97,22 @@
 
         function check(id, el) {
             const q = questions[currentIdx];
-            const isCorrect = id === q.answer;
+            const isCorrect = (id === q.answer);
 
             if (isCorrect) {
-                // 答对了：锁定所有按钮，亮绿灯，下一题
                 document.querySelectorAll('#options-display button').forEach(b => b.style.pointerEvents = 'none');
-                new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3').play();
+                new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3').play().catch(()=>{});
                 el.classList.add('ring-4', 'ring-green-400', 'border-green-500');
                 setTimeout(() => { currentIdx++; renderQuestion(); }, 1000);
             } else {
-                // 答错了：不锁定，只红灯震动，让学生继续尝试
-                new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play();
+                new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play().catch(()=>{});
                 el.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
-                // 1秒后自动移除错误样式，方便重试
                 setTimeout(() => {
                     el.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
                 }, 800);
             }
         }
+        
         loadData();
     </script>
 </body>
