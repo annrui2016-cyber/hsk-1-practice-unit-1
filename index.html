@@ -6,41 +6,52 @@
     <title>HSK 3.0 在线测试系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
         .ruby-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 6px; }
-        .pinyin { font-size: 0.8rem; color: #6b7280; line-height: 1; margin-bottom: 2px; }
-        .char { font-size: 1.6rem; font-weight: 500; color: #1f2937; }
+        .pinyin { font-size: 0.8rem; color: #64748b; line-height: 1; margin-bottom: 2px; font-weight: 400; }
+        .char { font-size: 1.6rem; font-weight: 700; color: #1e293b; }
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
         .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 md:p-8 font-sans">
+<body class="bg-[#f8fafc] min-h-screen flex flex-col items-center p-4 md:p-8">
 
-    <div class="w-full max-w-5xl mb-8">
-        <div class="flex justify-between items-start">
+    <div class="w-full max-w-5xl mb-10">
+        <div class="glass-header border-l-8 border-blue-600 rounded-2xl shadow-sm p-6 md:p-8 flex justify-between items-center border border-slate-200">
             <div>
-                <h2 id="sub-title" class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-1">HSK1 - Unit 1 - Meeting Each Other</h2>
-                <h1 id="main-title" class="text-3xl font-black text-slate-800">Listening 听力</h1>
-                <p id="section-info" class="text-slate-500 font-medium mt-1">第一部分（1-5题）</p>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">HSK 3.0 Level 1</span>
+                    <span class="text-slate-400 text-xs font-bold">— UNIT 1</span>
+                </div>
+                <h2 class="text-slate-500 font-bold text-sm tracking-wide mb-1">Meeting Each Other</h2>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Listening 听力</h1>
+                <div class="inline-block mt-3 bg-slate-900 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                    第一部分 (1-5题)
+                </div>
             </div>
-            <div id="progress-text" class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200 text-blue-600 font-black text-xl">0/0</div>
+            <div class="text-right hidden md:block">
+                <div class="text-slate-400 text-xs font-bold mb-1 uppercase tracking-widest">Progress 进度</div>
+                <div id="progress-text" class="text-5xl font-black text-blue-600 tabular-nums">0/0</div>
+            </div>
         </div>
     </div>
 
-    <div id="quiz-card" class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-10 border border-slate-100">
-        <div id="sentence-display" class="flex flex-col items-center justify-center mb-8 min-h-[140px] py-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-            <div class="text-slate-400">正在准备素材...</div>
+    <div id="quiz-card" class="w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl shadow-blue-100/50 p-6 md:p-12 border border-slate-100 relative overflow-hidden">
+        <div id="sentence-display" class="flex flex-col items-center justify-center mb-10 min-h-[160px] py-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 relative">
+            <div class="text-slate-300 font-bold uppercase tracking-widest text-sm">Preparing Assets...</div>
         </div>
         <div id="options-display" class="grid gap-4 md:gap-6"></div>
     </div>
 
-    <div id="feedback" class="mt-6 px-10 py-4 rounded-full font-bold text-lg hidden shadow-xl transition-all"></div>
+    <div id="feedback" class="mt-8 px-12 py-5 rounded-full font-black text-xl hidden shadow-2xl transition-all"></div>
 
     <script>
         let questions = [];
         let currentIdx = 0;
         let currentAudio = null;
 
-        // 洗牌算法：用于打乱选项顺序
         function shuffleArray(array) {
             let shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -56,13 +67,21 @@
                 questions = await response.json();
                 renderQuestion();
             } catch (err) {
-                document.getElementById('sentence-display').innerHTML = `<span class="text-red-500 font-bold">❌ 题库加载失败</span>`;
+                document.getElementById('sentence-display').innerHTML = `<span class="text-red-500 font-bold">Error loading JSON</span>`;
             }
         }
 
         function renderQuestion() {
             if (currentIdx >= questions.length) {
-                document.getElementById('quiz-card').innerHTML = `<div class="text-center py-16"><h2 class="text-3xl font-black text-slate-800 mb-8">🎉 练习完成！</h2><button onclick="location.reload()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg">重新开始</button></div>`;
+                document.getElementById('quiz-card').innerHTML = `
+                    <div class="text-center py-20 animate-in fade-in zoom-in duration-500">
+                        <div class="text-8xl mb-8">🎯</div>
+                        <h2 class="text-4xl font-black text-slate-900 mb-4">第一部分完成！</h2>
+                        <p class="text-slate-500 text-lg mb-10">你已经成功识别了本单元的核心词汇图片。</p>
+                        <button onclick="alert('即将加载 Part 2...') " class="bg-blue-600 text-white px-12 py-5 rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200 hover:scale-105 transition-all">
+                            继续做 Part 2 (Start Part 2)
+                        </button>
+                    </div>`;
                 return;
             }
 
@@ -72,13 +91,14 @@
             const sentenceDiv = document.getElementById('sentence-display');
             sentenceDiv.innerHTML = ''; 
 
-            // 1. 播放音频按钮（带题号）
             if (q.audio) {
                 const audioBtn = document.createElement('button');
-                audioBtn.className = "flex items-center px-8 py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all mb-2 shadow-lg active:scale-95 group";
+                audioBtn.className = "group flex items-center px-10 py-5 bg-slate-900 text-white rounded-3xl hover:bg-blue-600 transition-all mb-4 shadow-xl active:scale-95";
                 audioBtn.innerHTML = `
-                    <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
-                    <span class="text-lg font-bold">第${currentIdx + 1}题 - 播放录音 Play Audio</span>
+                    <div class="bg-blue-500 p-2 rounded-xl mr-4 group-hover:bg-white transition-colors">
+                        <svg class="w-6 h-6 text-white group-hover:text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
+                    </div>
+                    <span class="text-xl font-black tracking-tight">第 ${currentIdx + 1} 题 - 播放录音 Play Audio</span>
                 `;
                 audioBtn.onclick = () => {
                     if(currentAudio) currentAudio.pause();
@@ -86,15 +106,8 @@
                     currentAudio.play();
                 };
                 sentenceDiv.appendChild(audioBtn);
-                if (!q.show_text) {
-                    const tip = document.createElement('p');
-                    tip.className = "text-slate-400 text-xs font-bold mt-2";
-                    tip.innerText = "Listening Mode: Text Hidden";
-                    sentenceDiv.appendChild(tip);
-                }
             }
 
-            // 2. 渲染文字（如果非听力或强制显示）
             if (!q.audio || (q.audio && q.show_text)) {
                 const targetP = q.q_pinyin || q.pinyin || [];
                 const targetC = q.q_chars || q.chars || [];
@@ -104,26 +117,23 @@
                 sentenceDiv.appendChild(textWrap);
             }
 
-            // 3. 渲染选项（自动打乱顺序）
             const optionsDiv = document.getElementById('options-display');
             const isTextType = q.options[0].p !== undefined;
-
-            // 关键：对选项进行洗牌
             const shuffledOptions = shuffleArray(q.options);
 
             if (isTextType) {
                 optionsDiv.className = "grid grid-cols-1 gap-4 max-w-2xl mx-auto w-full";
                 optionsDiv.innerHTML = shuffledOptions.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-5 bg-white border-2 border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-slate-100 rounded-xl font-black text-slate-500 group-hover:bg-blue-500 group-hover:text-white mr-5 transition-colors">${opt.id}</div>
-                        <div class="flex flex-wrap option-sentence">${opt.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${opt.c[i]}</span></div>`).join('')}</div>
+                    <button onclick="checkAnswer('${opt.id}')" class="flex items-center p-6 bg-white border-2 border-slate-100 rounded-3xl hover:border-blue-500 hover:bg-blue-50 transition-all group shadow-sm">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-slate-50 rounded-2xl font-black text-slate-400 group-hover:bg-blue-500 group-hover:text-white mr-6 text-xl transition-all">${opt.id}</div>
+                        <div class="flex flex-wrap">${opt.p.map((p, i) => `<div class="ruby-container"><span class="pinyin">${p}</span><span class="char">${opt.c[i]}</span></div>`).join('')}</div>
                     </button>`).join('');
             } else {
-                optionsDiv.className = "grid grid-cols-2 md:grid-cols-5 gap-4";
+                optionsDiv.className = "grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6";
                 optionsDiv.innerHTML = shuffledOptions.map(opt => `
-                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-3xl overflow-hidden hover:border-blue-500 transition-all shadow-md">
-                        <div class="w-full aspect-square"><img src="${opt.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"></div>
-                        <div class="py-3 bg-slate-50 font-black text-xl group-hover:bg-blue-500 group-hover:text-white text-center transition-colors border-t border-slate-100">${opt.id}</div>
+                    <button onclick="checkAnswer('${opt.id}')" class="group bg-white border-2 border-slate-100 rounded-[2.5rem] overflow-hidden hover:border-blue-600 hover:shadow-2xl transition-all duration-500">
+                        <div class="w-full aspect-square"><img src="${opt.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"></div>
+                        <div class="py-4 bg-slate-50 font-black text-2xl group-hover:bg-blue-600 group-hover:text-white text-center transition-colors border-t border-slate-100">${opt.id}</div>
                     </button>`).join('');
             }
             document.getElementById('feedback').classList.add('hidden');
@@ -133,7 +143,7 @@
             const q = questions[currentIdx];
             const isCorrect = selectedId === q.answer;
             const fb = document.getElementById('feedback');
-            fb.className = `mt-6 px-10 py-4 rounded-full font-black text-lg text-white text-center shadow-lg transition-all ${isCorrect ? 'bg-green-500' : 'bg-red-500 animate-shake'}`;
+            fb.className = `mt-8 px-12 py-5 rounded-full font-black text-xl text-white text-center shadow-2xl transition-all ${isCorrect ? 'bg-green-500 scale-105' : 'bg-red-500 animate-shake'}`;
             fb.innerText = isCorrect ? "✅ 回答正确！Correct!" : "❌ 不对哦！Try Again";
             fb.classList.remove('hidden');
             if (isCorrect) setTimeout(() => { currentIdx++; renderQuestion(); }, 1200);
