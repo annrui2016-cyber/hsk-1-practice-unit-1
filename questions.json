@@ -1,26 +1,16 @@
-[
-  {
-    "id": 5,
-    "type": "Reading_Type_2",
-    "q_pinyin": ["nǐ", "jiào", "shén", "me", "míng", "zi", "?"],
-    "q_chars": ["你", "叫", "什", "么", "名", "字", "？"],
-    "options": [
-      {
-        "id": "A",
-        "p": ["wǒ", "jiào", "ā", "lǐ"],
-        "c": ["我", "叫", "阿", "里"]
-      },
-      {
-        "id": "B",
-        "p": ["tā", "shì", "lǎo", "shī"],
-        "c": ["他", "是", "老", "师"]
-      },
-      {
-        "id": "C",
-        "p": ["xiè", "xie"],
-        "c": ["谢", "谢"]
-      }
-    ],
-    "answer": "A"
-  }
-]
+{
+  "unit": "Unit 1 Practice",
+  "sections": [
+    {
+      "section_type": "Matching_Images", // 题型：听/读配图
+      "instructions": "听录音，选择相应的图片",
+      "items": [
+        {"id": 1, "audio": "q1.mp3", "text": "他是医生。", "answer_img": "doctor.jpg"},
+        {"id": 2, "audio": "q2.mp3", "text": "我是学生。", "answer_img": "student.jpg"},
+        {"id": 3, "audio": "q3.mp3", "text": "你好。", "answer_img": "hello.jpg"},
+        {"id": 4, "audio": "q4.mp3", "text": "谢谢。", "answer_img": "thanks.jpg"},
+        {"id": 5, "audio": "q5.mp3", "text": "再见。", "answer_img": "bye.jpg"}
+      ]
+    }
+  ]
+}
